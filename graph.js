@@ -53,38 +53,59 @@ function drawGraph() {
     });
 }
 
-// Function to generate a random graph
+// Function to check if the graph is connected
+function isConnected() {
+    const visitedNodes = new Set();
+    function dfs(nodeId) {
+        visitedNodes.add(nodeId);
+        const connectedEdges = edges.filter(edge => edge.start === nodeId || edge.end === nodeId);
+        connectedEdges.forEach(edge => {
+            const neighbor = edge.start === nodeId ? edge.end : edge.start;
+            if (!visitedNodes.has(neighbor)) {
+                dfs(neighbor);
+            }
+        });
+    }
+
+    // Start DFS from the first node
+    dfs(nodes[0].id);
+    return visitedNodes.size === nodes.length;
+}
+
+// Function to generate a random connected graph
 function generateRandomGraph() {
-    nodes = [];
-    edges = [];
+    do {
+        nodes = [];
+        edges = [];
 
-    const spacing = 100;
-    for (let i = 0; i < gridSize; i++) {
-        for (let j = 0; j < gridSize; j++) {
-            nodes.push({
-                id: i * gridSize + j + 1,
-                x: j * spacing + 50,
-                y: i * spacing + 50,
-            });
+        const spacing = 100;
+        for (let i = 0; i < gridSize; i++) {
+            for (let j = 0; j < gridSize; j++) {
+                nodes.push({
+                    id: i * gridSize + j + 1,
+                    x: j * spacing + 50,
+                    y: i * spacing + 50,
+                });
+            }
         }
-    }
 
-    const possibleEdges = [];
-    for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-            possibleEdges.push({
-                start: nodes[i].id,
-                end: nodes[j].id,
-                weight: Math.floor(Math.random() * 10) + 1,
-            });
+        const possibleEdges = [];
+        for (let i = 0; i < nodes.length; i++) {
+            for (let j = i + 1; j < nodes.length; j++) {
+                possibleEdges.push({
+                    start: nodes[i].id,
+                    end: nodes[j].id,
+                    weight: Math.floor(Math.random() * 10) + 1,
+                });
+            }
         }
-    }
 
-    while (edges.length < totalEdges && possibleEdges.length > 0) {
-        const randomIndex = Math.floor(Math.random() * possibleEdges.length);
-        const randomEdge = possibleEdges.splice(randomIndex, 1)[0];
-        edges.push(randomEdge);
-    }
+        while (edges.length < totalEdges && possibleEdges.length > 0) {
+            const randomIndex = Math.floor(Math.random() * possibleEdges.length);
+            const randomEdge = possibleEdges.splice(randomIndex, 1)[0];
+            edges.push(randomEdge);
+        }
+    } while (!isConnected()); // Regenerate the graph if it's not connected
 
     resetGraph();
 }
