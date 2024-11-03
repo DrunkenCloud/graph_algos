@@ -7,14 +7,12 @@ let mstEdges = [];
 let visited = new Set();
 let steps = [];
 let currentStep = 0;
-const gridSize = 4;
+const totalNodes = 10;
 const totalEdges = 20;
 
-// Function to draw the graph
 function drawGraph() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw edges with weights
     edges.forEach((edge, index) => {
         const startNode = nodes.find((n) => n.id === edge.start);
         const endNode = nodes.find((n) => n.id === edge.end);
@@ -26,17 +24,15 @@ function drawGraph() {
             ctx.lineWidth = mstEdges.includes(edge) ? 2.5 : 1.5;
             ctx.stroke();
 
-            // Draw weights, offset alternately to avoid overlap
             const midX = (startNode.x + endNode.x) / 2;
             const midY = (startNode.y + endNode.y) / 2;
-            const offset = (index % 2 === 0) ? 20 : -20; // Alternate offset
+            const offset = (index % 2 === 0) ? 10 : -10;
             ctx.font = "14px Arial";
             ctx.fillStyle = "#d32f2f";
             ctx.fillText(edge.weight.toString(), midX + offset, midY + offset);
         }
     });
 
-    // Draw nodes
     nodes.forEach((node) => {
         ctx.beginPath();
         ctx.arc(node.x, node.y, 18, 0, 2 * Math.PI);
@@ -46,14 +42,12 @@ function drawGraph() {
         ctx.lineWidth = 1.5;
         ctx.stroke();
 
-        // Draw node labels
         ctx.font = "14px Arial";
         ctx.fillStyle = "#333";
         ctx.fillText(node.id.toString(), node.x - 5, node.y + 5);
     });
 }
 
-// Function to check if the graph is connected
 function isConnected() {
     const visitedNodes = new Set();
     function dfs(nodeId) {
@@ -67,26 +61,26 @@ function isConnected() {
         });
     }
 
-    // Start DFS from the first node
     dfs(nodes[0].id);
     return visitedNodes.size === nodes.length;
 }
 
-// Function to generate a random connected graph
 function generateRandomGraph() {
     do {
         nodes = [];
         edges = [];
 
-        const spacing = 100;
-        for (let i = 0; i < gridSize; i++) {
-            for (let j = 0; j < gridSize; j++) {
-                nodes.push({
-                    id: i * gridSize + j + 1,
-                    x: j * spacing + 50,
-                    y: i * spacing + 50,
-                });
-            }
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const radius = Math.min(centerX, centerY) - 25;
+
+        for (let i = 0; i < totalNodes; i++) {
+            const angle = (2 * Math.PI * i) / totalNodes;
+            nodes.push({
+                id: i + 1,
+                x: centerX + radius * Math.cos(angle),
+                y: centerY + radius * Math.sin(angle),
+            });
         }
 
         const possibleEdges = [];
@@ -105,12 +99,11 @@ function generateRandomGraph() {
             const randomEdge = possibleEdges.splice(randomIndex, 1)[0];
             edges.push(randomEdge);
         }
-    } while (!isConnected()); // Regenerate the graph if it's not connected
+    } while (!isConnected());
 
     resetGraph();
 }
 
-// Prim's Algorithm initialization
 function startPrim() {
     mstEdges = [];
     visited = new Set();
@@ -147,7 +140,6 @@ function startPrim() {
     drawGraph();
 }
 
-// Advance one step in Prim's algorithm
 function nextStep() {
     if (currentStep < steps.length) {
         const edge = steps[currentStep];
@@ -159,7 +151,6 @@ function nextStep() {
     }
 }
 
-// Reset the graph view
 function resetGraph() {
     mstEdges = [];
     visited = new Set();
@@ -167,11 +158,9 @@ function resetGraph() {
     drawGraph();
 }
 
-// Initial drawing
 generateRandomGraph();
 drawGraph();
 
-// Expose functions to window
 window.generateRandomGraph = generateRandomGraph;
 window.startPrim = startPrim;
 window.nextStep = nextStep;
